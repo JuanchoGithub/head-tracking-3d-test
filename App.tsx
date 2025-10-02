@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Scene from './components/Scene';
 import HeadTracker from './components/HeadTracker';
 import Spinner from './components/Spinner';
@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [headPosition, setHeadPosition] = useState<HeadPosition>({ x: 0, y: 0 });
   const [currentScene, setCurrentScene] = useState<SceneType>('mirror');
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleStart = () => {
     setAppState(AppState.Loading);
@@ -81,6 +82,7 @@ const App: React.FC = () => {
             <SceneSelector currentScene={currentScene} onSceneChange={setCurrentScene} />
           )}
           <HeadTracker 
+            ref={videoRef}
             onHeadMove={handleHeadMove} 
             onLoaded={handleTrackerLoaded} 
             onError={handleError}

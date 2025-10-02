@@ -22,14 +22,12 @@ const LilyFlowerSVG: React.FC<{ className?: string }> = ({ className }) => (
                 <stop offset="80%" style={{stopColor: '#F8BBD0'}} />
             </radialGradient>
         </defs>
-        {/* Render petals in a circle */}
         {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
              <path key={angle} d="M50 10 C 40 30, 40 50, 50 60 C 60 50, 60 30, 50 10 Z" fill="url(#petalGradient)" transform={`rotate(${angle} 50 50)`} transform-origin="50 50" />
         ))}
         <circle cx="50" cy="50" r="8" fill="#FFD700" />
     </svg>
 );
-
 
 const FishSVG: React.FC<{ className?: string }> = ({ className }) => (
     <svg viewBox="0 0 150 70" className={className}>
@@ -44,7 +42,6 @@ const FishSVG: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
-
 const PondScene: React.FC<SceneProps> = ({ headPosition }) => {
   const smoothedX = useSmoothedValue(headPosition.x, 0.05);
   const smoothedY = useSmoothedValue(headPosition.y, 0.05);
@@ -52,25 +49,14 @@ const PondScene: React.FC<SceneProps> = ({ headPosition }) => {
   const rotateY = -smoothedX * MAX_ROTATION;
   const rotateX = smoothedY * MAX_ROTATION;
 
+
   return (
     <div
       className="w-full h-full overflow-hidden bg-[#2a3a3f]"
-      style={{ 
-        perspective: '1500px',
-      }}
+      style={{ perspective: '1500px' }}
     >
         <style>{`
-            @keyframes ripple {
-                0% {
-                    transform: translate(-50%, -50%) scale(0);
-                    opacity: 0.6;
-                }
-                100% {
-                    transform: translate(-50%, -50%) scale(1.5);
-                    opacity: 0;
-                }
-            }
-             @keyframes caustics {
+            @keyframes caustics {
                 0% { background-position: 0% 0%; }
                 100% { background-position: -200% -200%; }
             }
@@ -88,6 +74,18 @@ const PondScene: React.FC<SceneProps> = ({ headPosition }) => {
                 100% { transform: translate(0, 0) rotate(-110deg) translateZ(30px); }
             }
         `}</style>
+        {/* SVG filter for water distortion */}
+        <svg width="0" height="0" style={{ position: 'absolute' }}>
+            <defs>
+                <filter id="water-distortion">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" seed="2" stitchTiles="stitch">
+                        <animate attributeName="baseFrequency" dur="15s" keyTimes="0;0.5;1" values="0.01 0.04;0.02 0.06;0.01 0.04" repeatCount="indefinite" />
+                    </feTurbulence>
+                    <feDisplacementMap in="SourceGraphic" scale="15" />
+                </filter>
+            </defs>
+        </svg>
+
       <div
         className="relative w-full h-full transition-transform duration-100 ease-out"
         style={{
@@ -105,21 +103,15 @@ const PondScene: React.FC<SceneProps> = ({ headPosition }) => {
                 transformStyle: 'preserve-3d',
             }}
         >
-            {/* Rocks and Logs */}
             <div className="absolute w-40 h-32 bg-[#4a4a4a] rounded-full shadow-inner" style={{ top: '20%', left: '30%', transform: 'translateZ(15px) rotateX(20deg)' }}></div>
             <div className="absolute w-60 h-48 bg-[#3d3d3d] rounded-full shadow-inner" style={{ bottom: '10%', left: '10%', transform: 'translateZ(5px)' }}></div>
             <div className="absolute w-24 h-20 bg-[#555] rounded-full shadow-inner" style={{ top: '15%', right: '15%', transform: 'translateZ(20px)' }}></div>
             <div className="absolute rounded-full bg-gradient-to-r from-[#5a3a22] to-[#492e1a]" style={{ width: '400px', height: '40px', top: '50%', left: '60%', transform: 'translateZ(30px) rotate(-20deg)' }}></div>
-
-            {/* Algae */}
             <div className="absolute w-40 h-32 bg-green-900/50 rounded-full blur-sm" style={{ top: '22%', left: '31%', transform: 'translateZ(16px)'}}></div>
             <div className="absolute w-32 h-24 bg-green-900/40 rounded-full blur-sm" style={{ top: '60%', left: '70%'}}></div>
             <div className="absolute w-24 h-20 bg-green-900/50 rounded-full blur-md" style={{ top: '75%', left: '15%'}}></div>
-
-            {/* Fish */}
             <div className="absolute w-32" style={{ top: '30%', left: '60%', animation: 'swim1 18s ease-in-out infinite' }}><FishSVG /></div>
             <div className="absolute w-24" style={{ top: '65%', left: '25%', animation: 'swim2 25s ease-in-out infinite' }}><FishSVG /></div>
-
         </div>
 
         {/* Caustic Light Effect */}
@@ -134,74 +126,39 @@ const PondScene: React.FC<SceneProps> = ({ headPosition }) => {
             }}
         />
 
-        {/* Sky Reflection Layer */}
-         <div 
-            className="absolute top-1/2 left-1/2 w-full h-full bg-gradient-to-b from-sky-300/10 to-transparent opacity-50"
-            style={{ transform: 'translateX(-50%) translateY(-50%) translateZ(101px)' }}
-        />
+        {/* Depth Fog Layers */}
+        <div className="absolute top-1/2 left-1/2 w-full h-full bg-cyan-900/5 backdrop-blur-px" style={{ transform: 'translateX(-50%) translateY(-50%) translateZ(-100px)' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full bg-cyan-900/10 backdrop-blur-sm" style={{ transform: 'translateX(-50%) translateY(-50%) translateZ(-300px)' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full bg-cyan-900/15 backdrop-blur-md" style={{ transform: 'translateX(-50%) translateY(-50%) translateZ(-450px)' }}></div>
+
 
         {/* Water Tint Layer */}
          <div 
-            className="absolute top-1/2 left-1/2 w-full h-full bg-cyan-800/20 backdrop-blur-sm overflow-hidden"
-            style={{ transform: 'translateX(-50%) translateY(-50%) translateZ(100px)' }}
+            className="absolute top-1/2 left-1/2 w-full h-full bg-cyan-800/20 overflow-hidden"
+            style={{ 
+                transform: 'translateX(-50%) translateY(-50%) translateZ(100px)',
+                filter: 'url(#water-distortion)',
+            }}
         >
-            {/* Ripple Effect */}
-            <div
-                className="absolute top-1/2 left-1/2 w-[1px] h-[1px] rounded-full"
-                style={{
-                    boxShadow: '0 0 60px 20px rgba(173, 216, 230, 0.1)',
-                    animation: 'ripple 5s ease-out infinite',
-                    animationDelay: '0s',
-                }}
-            />
-             <div
-                className="absolute top-1/2 left-1/2 w-[1px] h-[1px] rounded-full"
-                style={{
-                    boxShadow: '0 0 50px 15px rgba(173, 216, 230, 0.1)',
-                    animation: 'ripple 5s ease-out infinite',
-                    animationDelay: '2.5s',
-                }}
-            />
         </div>
 
         {/* Lilypad 1 (with flower) */}
         <div className="absolute w-48 h-48" style={{ top: '20%', left: '15%', transformStyle: 'preserve-3d' }}>
             <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'translateZ(100px)'}}><LilypadSVG /></div>
              <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'translateZ(115px) scale(0.6)'}}><LilyFlowerSVG /></div>
-            <div 
-                className="absolute top-1/2 left-1/2 bg-green-800/70 w-2 shadow-inner"
-                style={{
-                    height: '600px', // Surface(100) to Floor(-500)
-                    transformOrigin: 'top',
-                    transform: 'translateX(-50%) translateZ(100px) rotateX(-90deg)'
-                }}
-            />
+            <div className="absolute top-1/2 left-1/2 bg-gradient-to-t from-green-900/80 to-green-800/70 w-2" style={{ height: '600px', transformOrigin: 'top', transform: 'translateX(-50%) translateZ(100px) rotateX(-90deg)' }} />
         </div>
 
         {/* Lilypad 2 */}
         <div className="absolute w-32 h-32" style={{ top: '55%', left: '40%', transformStyle: 'preserve-3d' }}>
             <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'translateZ(100px)'}}><LilypadSVG /></div>
-            <div 
-                className="absolute top-1/2 left-1/2 bg-green-800/70 w-1.5 shadow-inner"
-                style={{
-                    height: '600px',
-                    transformOrigin: 'top',
-                    transform: 'translateX(-50%) translateZ(100px) rotateX(-90deg)'
-                }}
-            />
+            <div className="absolute top-1/2 left-1/2 bg-gradient-to-t from-green-900/80 to-green-800/70 w-1.5" style={{ height: '600px', transformOrigin: 'top', transform: 'translateX(-50%) translateZ(100px) rotateX(-90deg)' }} />
         </div>
 
         {/* Lilypad 3 */}
         <div className="absolute w-40 h-40" style={{ top: '30%', left: '70%', transformStyle: 'preserve-3d' }}>
             <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'translateZ(100px)'}}><LilypadSVG /></div>
-            <div 
-                className="absolute top-1/2 left-1/2 bg-green-800/70 w-2 shadow-inner"
-                style={{
-                    height: '600px',
-                    transformOrigin: 'top',
-                    transform: 'translateX(-50%) translateZ(100px) rotateX(-90deg)'
-                }}
-            />
+            <div className="absolute top-1/2 left-1/2 bg-gradient-to-t from-green-900/80 to-green-800/70 w-2" style={{ height: '600px', transformOrigin: 'top', transform: 'translateX(-50%) translateZ(100px) rotateX(-90deg)' }} />
         </div>
 
       </div>

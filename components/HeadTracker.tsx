@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useCallback, useState, useImperativeHandle, forwardRef } from 'react';
 import { HeadPosition } from '../types';
 
 // Fix for face-api.js and FaceDetector types not being available globally
@@ -35,15 +35,17 @@ interface HeadTrackerProps {
 
 const MODEL_URL = 'https://raw.githack.com/justadudewhohacks/face-api.js/master/weights/';
 
-const HeadTracker: React.FC<HeadTrackerProps> = ({
+const HeadTracker = forwardRef<HTMLVideoElement, HeadTrackerProps>(({
   onHeadMove,
   onLoaded,
   onError,
   isVisible,
   videoWidth = 640,
   videoHeight = 480,
-}) => {
+}, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  useImperativeHandle(ref, () => videoRef.current!);
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number | null>(null);
 
@@ -129,11 +131,6 @@ const HeadTracker: React.FC<HeadTrackerProps> = ({
         const normalizedX = (centerX / videoWidth - 0.5) * 2;
         const normalizedY = (centerY / videoHeight - 0.5) * 2;
         
-        // The video feed is mirrored (scaleX(-1)).
-        // When the user moves their head to the right, the detection box moves to the left in the video frame.
-        // This results in a negative normalizedX value.
-        // To create a consistent "diorama" effect where moving right shows the right side of the scene,
-        // we must invert the sign of normalizedX to counteract the video mirroring.
         onHeadMove({ x: -normalizedX, y: normalizedY });
       } else {
         setLastTrackedFace(null);
@@ -201,6 +198,6 @@ const HeadTracker: React.FC<HeadTrackerProps> = ({
       />
     </div>
   );
-};
+});
 
 export default HeadTracker;
