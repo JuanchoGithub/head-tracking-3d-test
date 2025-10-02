@@ -1,0 +1,71 @@
+import React from 'react';
+import { HeadPosition } from '../types';
+import { useSmoothedValue } from '../hooks/useSmoothedValue';
+
+interface SceneProps {
+  headPosition: HeadPosition;
+}
+
+const MAX_ROTATION = 15; // Max rotation in degrees
+
+const Scene: React.FC<SceneProps> = ({ headPosition }) => {
+  const smoothedX = useSmoothedValue(headPosition.x);
+  const smoothedY = useSmoothedValue(headPosition.y);
+
+  const rotateY = smoothedX * MAX_ROTATION;
+  const rotateX = -smoothedY * MAX_ROTATION;
+
+  return (
+    <div
+      className="w-full h-full flex items-center justify-center"
+      style={{ perspective: '1000px' }}
+    >
+      <div
+        className="relative w-4/5 h-4/5 transition-transform duration-100 ease-out"
+        style={{
+          transformStyle: 'preserve-3d',
+          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+        }}
+      >
+        {/* Backmost Layer */}
+        <div
+          className="absolute top-1/2 left-1/2 w-[120%] h-[120%] -translate-x-1/2 -translate-y-1/2 p-8 border border-sky-900/50 rounded-3xl bg-gray-800/10 backdrop-blur-sm"
+          style={{ transform: 'translateZ(-250px)' }}
+        >
+           <img src="https://picsum.photos/800/600?grayscale&blur=2" alt="background" className="w-full h-full object-cover rounded-2xl opacity-20"/>
+        </div>
+        
+        {/* Mid Layer */}
+        <div
+          className="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2 p-8 border border-sky-500/30 rounded-3xl bg-sky-900/10 backdrop-blur-md flex items-center justify-center text-center shadow-2xl shadow-sky-900/50"
+          style={{ transform: 'translateZ(0px)' }}
+        >
+            <div className="flex flex-col items-center">
+                 <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-blue-500">
+                    True3D
+                </h1>
+                <p className="mt-2 text-lg text-sky-200/80">No glasses required.</p>
+            </div>
+        </div>
+
+        {/* Front Layer */}
+         <div
+          className="absolute top-1/2 left-1/2 w-1/2 h-1/2 -translate-x-1/2 -translate-y-1/2 p-4 border-2 border-sky-400/80 rounded-2xl bg-sky-800/20 backdrop-blur-lg flex items-end justify-end shadow-[0_0_30px_rgba(72,187,255,0.4)]"
+          style={{ transform: 'translateZ(150px)' }}
+        >
+           <p className="text-xs text-sky-300/70 p-2">UI Layer 01</p>
+        </div>
+
+        {/* Floating element */}
+         <div
+          className="absolute top-[20%] left-[80%] w-24 h-24 -translate-x-1/2 -translate-y-1/2 border border-blue-500/50 rounded-full bg-blue-900/30 flex items-center justify-center"
+          style={{ transform: 'translateZ(80px)' }}
+        >
+           <div className="w-4 h-4 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(100,200,255,0.8)]"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Scene;

@@ -1,0 +1,7 @@
+{
+  "name": "Head-Tracked 3D Window",
+  "description": "Uses your camera to track your head, creating a 3D window effect without glasses. The view changes in real-time based on your head's position, making the screen feel like a window into a 3D scene.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
