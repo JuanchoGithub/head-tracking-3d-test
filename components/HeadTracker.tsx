@@ -106,7 +106,12 @@ const HeadTracker: React.FC<HeadTrackerProps> = ({
         const normalizedX = (centerX / videoWidth - 0.5) * 2;
         const normalizedY = (centerY / videoHeight - 0.5) * 2;
         
-        onHeadMove({ x: -normalizedX, y: normalizedY });
+        // The video is flipped (scaleX(-1)), so the logic for X must be flipped too.
+        // Moving your head to your right moves the detection box to the left of the frame.
+        // A detection on the left results in a negative normalizedX.
+        // To make the 3D scene rotate to show its left side, we need a negative rotation.
+        // Therefore, we should pass the negative normalizedX directly.
+        onHeadMove({ x: normalizedX, y: normalizedY });
       } else {
         setLastTrackedFace(null);
       }

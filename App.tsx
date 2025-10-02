@@ -2,12 +2,14 @@ import React, { useState, useCallback } from 'react';
 import Scene from './components/Scene';
 import HeadTracker from './components/HeadTracker';
 import Spinner from './components/Spinner';
-import { HeadPosition, AppState } from './types';
+import { HeadPosition, AppState, SceneType } from './types';
+import SceneSelector from './components/SceneSelector';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.Idle);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [headPosition, setHeadPosition] = useState<HeadPosition>({ x: 0, y: 0 });
+  const [currentScene, setCurrentScene] = useState<SceneType>('default');
 
   const handleStart = () => {
     setAppState(AppState.Loading);
@@ -73,8 +75,11 @@ const App: React.FC = () => {
       {showActiveState && (
         <>
           <div className={`w-full h-full absolute top-0 left-0 transition-opacity duration-1000 ${appState === AppState.Tracking ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <Scene headPosition={headPosition} />
+            <Scene headPosition={headPosition} scene={currentScene} />
           </div>
+           {appState === AppState.Tracking && (
+            <SceneSelector currentScene={currentScene} onSceneChange={setCurrentScene} />
+          )}
           <HeadTracker 
             onHeadMove={handleHeadMove} 
             onLoaded={handleTrackerLoaded} 

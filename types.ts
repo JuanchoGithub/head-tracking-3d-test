@@ -10,6 +10,8 @@ export enum AppState {
   Error,
 }
 
+export type SceneType = 'default' | 'mirror' | 'space' | 'matrix';
+
 // Add Shape Detection API types for FaceDetector to the global scope
 // This avoids TypeScript errors for this modern, but not universally typed, API.
 
