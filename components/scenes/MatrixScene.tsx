@@ -1,20 +1,28 @@
 import React, { useRef, useEffect } from 'react';
 import { HeadPosition } from '../../types';
 import { useSmoothedValue } from '../../hooks/useSmoothedValue';
+import { useWindowSize } from '../../hooks/useWindowSize';
 
 interface SceneProps {
   headPosition: HeadPosition;
 }
 
 const MAX_ROTATION = 18;
+const SCALE_FACTOR = 1.15;
 
 // Reusable drawing function for the Matrix effect
 const setupMatrixCanvas = (canvas: HTMLCanvasElement, options: { fontSize: number, fillStyle: string, clearAlpha: string }) => {
   const context = canvas.getContext('2d');
   if (!context) return () => {};
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // Render at higher res to avoid blurriness from scaling/high-DPI displays
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  canvas.style.width = `${window.innerWidth}px`;
+  canvas.style.height = `${window.innerHeight}px`;
+  context.scale(dpr, dpr);
+
 
   const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
   const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -22,7 +30,7 @@ const setupMatrixCanvas = (canvas: HTMLCanvasElement, options: { fontSize: numbe
   const alphabet = katakana + latin + nums;
 
   const { fontSize, fillStyle, clearAlpha } = options;
-  const columns = Math.ceil(canvas.width / fontSize);
+  const columns = Math.ceil(canvas.width / fontSize / dpr);
 
   const rainDrops: number[] = [];
   for (let x = 0; x < columns; x++) {
@@ -60,12 +68,17 @@ const setupMatrixCanvas = (canvas: HTMLCanvasElement, options: { fontSize: numbe
 const MatrixScene: React.FC<SceneProps> = ({ headPosition }) => {
   const canvasRefFore = useRef<HTMLCanvasElement>(null);
   const canvasRefBack = useRef<HTMLCanvasElement>(null);
-
+  
+  const { width, height } = useWindowSize();
   const smoothedX = useSmoothedValue(headPosition.x);
   const smoothedY = useSmoothedValue(headPosition.y);
 
-  const rotateY = -smoothedX * MAX_ROTATION;
-  const rotateX = smoothedY * MAX_ROTATION;
+  const screenAspectRatio = width > 0 && height > 0 ? width / height : 1;
+  const horizontalMultiplier = screenAspectRatio > 1 ? 1 + (screenAspectRatio - 1) * 0.5 : 1;
+  const verticalMultiplier = screenAspectRatio < 1 ? 1 + (1 / screenAspectRatio - 1) * 0.5 : 1;
+
+  const rotateY = -smoothedX * MAX_ROTATION * horizontalMultiplier;
+  const rotateX = smoothedY * MAX_ROTATION * verticalMultiplier;
 
   // Effect for the foreground canvas
   useEffect(() => {
@@ -76,7 +89,7 @@ const MatrixScene: React.FC<SceneProps> = ({ headPosition }) => {
       clearAlpha: 'rgba(0, 0, 0, 0.05)'
     });
     return cleanup;
-  }, []);
+  }, [width, height]); // Rerun on resize
 
   // Effect for the background canvas
   useEffect(() => {
@@ -87,7 +100,7 @@ const MatrixScene: React.FC<SceneProps> = ({ headPosition }) => {
         clearAlpha: 'rgba(0, 0, 0, 0.08)' // Slower fade
     });
     return cleanup;
-  }, []);
+  }, [width, height]); // Rerun on resize
 
 
   return (
@@ -99,7 +112,7 @@ const MatrixScene: React.FC<SceneProps> = ({ headPosition }) => {
         className="relative w-full h-full transition-transform duration-100 ease-out"
         style={{
           transformStyle: 'preserve-3d',
-          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+          transform: `scale(${SCALE_FACTOR}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
         }}
       >
         <canvas 

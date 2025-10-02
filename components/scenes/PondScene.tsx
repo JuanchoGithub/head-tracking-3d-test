@@ -1,12 +1,14 @@
 import React from 'react';
 import { HeadPosition } from '../../types';
 import { useSmoothedValue } from '../../hooks/useSmoothedValue';
+import { useWindowSize } from '../../hooks/useWindowSize';
 
 interface SceneProps {
   headPosition: HeadPosition;
 }
 
 const MAX_ROTATION = 12;
+const SCALE_FACTOR = 1.15;
 
 const LilypadSVG: React.FC<{ className?: string }> = ({ className }) => (
     <svg viewBox="0 0 100 100" className={className} fill="#4A794A">
@@ -43,12 +45,16 @@ const FishSVG: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 const PondScene: React.FC<SceneProps> = ({ headPosition }) => {
+  const { width, height } = useWindowSize();
   const smoothedX = useSmoothedValue(headPosition.x, 0.05);
   const smoothedY = useSmoothedValue(headPosition.y, 0.05);
 
-  const rotateY = -smoothedX * MAX_ROTATION;
-  const rotateX = smoothedY * MAX_ROTATION;
+  const screenAspectRatio = width > 0 && height > 0 ? width / height : 1;
+  const horizontalMultiplier = screenAspectRatio > 1 ? 1 + (screenAspectRatio - 1) * 0.5 : 1;
+  const verticalMultiplier = screenAspectRatio < 1 ? 1 + (1 / screenAspectRatio - 1) * 0.5 : 1;
 
+  const rotateY = -smoothedX * MAX_ROTATION * horizontalMultiplier;
+  const rotateX = smoothedY * MAX_ROTATION * verticalMultiplier;
 
   return (
     <div
@@ -90,7 +96,7 @@ const PondScene: React.FC<SceneProps> = ({ headPosition }) => {
         className="relative w-full h-full transition-transform duration-100 ease-out"
         style={{
           transformStyle: 'preserve-3d',
-          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+          transform: `scale(${SCALE_FACTOR}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
           transformOrigin: 'center top',
         }}
       >
