@@ -17,7 +17,7 @@ const DefaultScene: React.FC<SceneProps> = ({ headPosition }) => {
 
   return (
     <div
-      className="w-full h-full flex items-center justify-center"
+      className="w-full h-full"
       style={{ perspective: '1200px' }}
     >
       <div
@@ -25,6 +25,7 @@ const DefaultScene: React.FC<SceneProps> = ({ headPosition }) => {
         style={{
           transformStyle: 'preserve-3d',
           transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+          transformOrigin: 'center top',
         }}
       >
         {/* Backmost Layer */}

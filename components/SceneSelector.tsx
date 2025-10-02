@@ -7,10 +7,8 @@ interface SceneSelectorProps {
 }
 
 const scenes: { id: SceneType; name: string }[] = [
-  { id: 'default', name: 'Default' },
   { id: 'mirror', name: 'Infinity Mirror' },
-  { id: 'space', name: 'Deep Space' },
-  { id: 'matrix', name: 'Matrix Rain' },
+  { id: 'pond', name: 'Koi Pond' },
 ];
 
 const SceneSelector: React.FC<SceneSelectorProps> = ({ currentScene, onSceneChange }) => {

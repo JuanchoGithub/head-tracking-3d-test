@@ -9,7 +9,7 @@ const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.Idle);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [headPosition, setHeadPosition] = useState<HeadPosition>({ x: 0, y: 0 });
-  const [currentScene, setCurrentScene] = useState<SceneType>('default');
+  const [currentScene, setCurrentScene] = useState<SceneType>('mirror');
 
   const handleStart = () => {
     setAppState(AppState.Loading);

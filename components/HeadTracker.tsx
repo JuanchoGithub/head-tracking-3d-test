@@ -1,6 +1,29 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { HeadPosition } from '../types';
 
+// Fix for face-api.js and FaceDetector types not being available globally
+declare const faceapi: {
+  nets: {
+      tinyFaceDetector: {
+          loadFromUri(uri: string): Promise<void>;
+      };
+  };
+  detectSingleFace(input: any, options: any): Promise<{ box: { x: number, y: number, width: number, height: number } } | undefined>;
+  TinyFaceDetectorOptions: new () => any;
+};
+
+interface FaceDetector {
+  detect(image: ImageBitmapSource): Promise<{ boundingBox: { x: number; y: number; width: number; height: number; } }[]>;
+}
+
+declare global {
+  interface Window {
+      FaceDetector: {
+          new(options?: { fastMode?: boolean }): FaceDetector;
+      };
+  }
+}
+
 interface HeadTrackerProps {
   onHeadMove: (position: HeadPosition) => void;
   onLoaded: () => void;
@@ -106,12 +129,12 @@ const HeadTracker: React.FC<HeadTrackerProps> = ({
         const normalizedX = (centerX / videoWidth - 0.5) * 2;
         const normalizedY = (centerY / videoHeight - 0.5) * 2;
         
-        // The video is flipped (scaleX(-1)), so the logic for X must be flipped too.
-        // Moving your head to your right moves the detection box to the left of the frame.
-        // A detection on the left results in a negative normalizedX.
-        // To make the 3D scene rotate to show its left side, we need a negative rotation.
-        // Therefore, we should pass the negative normalizedX directly.
-        onHeadMove({ x: normalizedX, y: normalizedY });
+        // The video feed is mirrored (scaleX(-1)).
+        // When the user moves their head to the right, the detection box moves to the left in the video frame.
+        // This results in a negative normalizedX value.
+        // To create a consistent "diorama" effect where moving right shows the right side of the scene,
+        // we must invert the sign of normalizedX to counteract the video mirroring.
+        onHeadMove({ x: -normalizedX, y: normalizedY });
       } else {
         setLastTrackedFace(null);
       }
