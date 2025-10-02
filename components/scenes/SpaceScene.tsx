@@ -6,7 +6,7 @@ interface SceneProps {
   headPosition: HeadPosition;
 }
 
-const MAX_ROTATION = 12;
+const MAX_ROTATION = 15;
 
 // Function to generate random stars for the box-shadow property
 const generateStars = (count: number, width: number, height: number) => {
@@ -53,8 +53,8 @@ const SpaceScene: React.FC<SceneProps> = ({ headPosition }) => {
   const smoothedX = useSmoothedValue(headPosition.x, 0.05);
   const smoothedY = useSmoothedValue(headPosition.y, 0.05);
 
-  const rotateY = smoothedX * MAX_ROTATION;
-  const rotateX = -smoothedY * MAX_ROTATION;
+  const rotateY = -smoothedX * MAX_ROTATION;
+  const rotateX = smoothedY * MAX_ROTATION;
 
   return (
     <div
@@ -71,9 +71,10 @@ const SpaceScene: React.FC<SceneProps> = ({ headPosition }) => {
           transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
         }}
       >
-        <StarLayer size={1} count={400} translateZ={-500} animationDuration="150s" />
-        <StarLayer size={2} count={200} translateZ={-200} animationDuration="100s" />
-        <StarLayer size={3} count={50} translateZ={-50} animationDuration="50s" />
+        <StarLayer size={1} count={600} translateZ={-800} animationDuration="250s" />
+        <StarLayer size={1} count={400} translateZ={-500} animationDuration="200s" />
+        <StarLayer size={2} count={200} translateZ={-250} animationDuration="120s" />
+        <StarLayer size={3} count={50}  translateZ={-100} animationDuration="60s" />
       </div>
     </div>
   );
